@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { converters } from "@/lib/converters";
 
-const BASE_URL = "https://converhub-three.vercel.app";
+const BASE_URL = "https://zapconvert.net";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const converterPages = converters.map((c) => ({

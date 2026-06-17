@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Unsupported conversion: ${from} → ${to}` }, { status: 400 });
     }
 
-    const filename = `${originalName}-converthub.${ext}`;
+    const filename = `${originalName}-zapconvert.${ext}`;
 
     return new NextResponse(resultBuffer as unknown as BodyInit, {
       status: 200,

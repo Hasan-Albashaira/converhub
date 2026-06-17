@@ -12,7 +12,7 @@ export default function Footer() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
               </div>
-              <span className="text-white font-bold text-lg">ConvertHub</span>
+              <span className="text-white font-bold text-lg">ZapConvert</span>
             </div>
             <p className="text-sm leading-relaxed">
               Free online file converter. Fast, secure, and private. Files auto-deleted after 1 hour.
@@ -50,7 +50,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-slate-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
-          <p>&copy; {new Date().getFullYear()} ConvertHub. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} ZapConvert. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">

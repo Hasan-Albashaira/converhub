@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blog — ConvertHub",
+  title: "Blog — ZapConvert",
   description: "Tips, guides, and tutorials on file conversion and document management.",
 };
 
