@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     description: "Fast, free, and secure file conversion for everyone.",
     type: "website",
   },
+  verification: {
+    google: "IPEqRY6TwcLcA5tYF1Zs3DW1MfvSKeokO5G3eRvGBw",
+  },
 };
 
 export default function RootLayout({
