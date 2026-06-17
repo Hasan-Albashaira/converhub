@@ -44,7 +44,9 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-KXSMKXG2LS');
+              gtag('config', 'G-KXSMKXG2LS', {
+                cookie_domain: 'zapconvert.net'
+              });
             `,
           }}
         />
