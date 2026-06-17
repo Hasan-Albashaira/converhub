@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const converter = getConverter(slug);
   if (!converter) return {};
   return {
-    title: `${converter.label} — Free Online Converter | ConverHub`,
+    title: `${converter.label} — Free Online Converter | ConvertHub`,
     description: `${converter.description} Free, fast, and secure. No signup required. Files auto-deleted after 1 hour.`,
   };
 }

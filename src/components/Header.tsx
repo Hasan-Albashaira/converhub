@@ -16,7 +16,7 @@ export default function Header() {
               </svg>
             </div>
             <span className="text-xl font-bold text-slate-900">
-              Conver<span className="text-indigo-600">Hub</span>
+              Convert<span className="text-indigo-600">Hub</span>
             </span>
           </Link>
 

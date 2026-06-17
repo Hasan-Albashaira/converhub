@@ -10,13 +10,13 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "ConverHub — Convert Any File Free Online",
+  title: "ConvertHub — Convert Any File Free Online",
   description:
     "Free online file converter. Convert PDF, images, audio, video, and more. Fast, secure, no signup required. Files deleted after 1 hour.",
   keywords:
     "file converter, pdf to word, jpg to png, mp4 to mp3, online converter, free converter",
   openGraph: {
-    title: "ConverHub — Convert Any File Free Online",
+    title: "ConvertHub — Convert Any File Free Online",
     description: "Fast, free, and secure file conversion for everyone.",
     type: "website",
   },

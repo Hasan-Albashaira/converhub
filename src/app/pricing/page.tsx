@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Pricing — ConverHub",
+  title: "Pricing — ConvertHub",
   description: "Simple, transparent pricing. Start free, upgrade when you need more.",
 };
 
