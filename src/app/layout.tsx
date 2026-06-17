@@ -33,6 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
       <head>
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5488522956972594"
+          crossOrigin="anonymous"
+        />
         {/* Google Analytics — must be in <head> for Search Console verification */}
         <script
           async
