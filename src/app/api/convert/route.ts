@@ -1,22 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
 
-export const config = { api: { bodyParser: false } };
-
-// ── Image conversion (Sharp handles JPG, PNG, WebP, SVG, BMP, TIFF, GIF) ─────
+// ── Image conversion (Sharp) ───────────────────────────────────────────────────
 async function convertImage(
   buffer: Buffer,
   to: string
 ): Promise<{ buffer: Buffer; mime: string }> {
+  // Dynamic import so a missing Sharp binary only breaks image conversions,
+  // not the entire API route module.
+  const sharp = (await import("sharp")).default;
   const pipeline = sharp(buffer, { failOnError: false });
+
   switch (to) {
     case "jpg":
     case "jpeg":
-      return { buffer: await pipeline.flatten({ background: "#ffffff" }).jpeg({ quality: 90 }).toBuffer(), mime: "image/jpeg" };
+      return {
+        buffer: await pipeline.flatten({ background: "#ffffff" }).jpeg({ quality: 90 }).toBuffer(),
+        mime: "image/jpeg",
+      };
     case "png":
       return { buffer: await pipeline.png().toBuffer(), mime: "image/png" };
     case "webp":
@@ -26,7 +30,7 @@ async function convertImage(
   }
 }
 
-// ── PDF → image ───────────────────────────────────────────────────────────────
+// ── PDF → image ────────────────────────────────────────────────────────────────
 async function pdfToImage(
   buffer: Buffer,
   outputFormat: "jpg" | "png"
@@ -59,13 +63,16 @@ async function pdfToImage(
   };
 }
 
-// ── Image → PDF ───────────────────────────────────────────────────────────────
-async function imageToPdf(buffer: Buffer, mime: string): Promise<{ buffer: Buffer; mime: string }> {
+// ── Image → PDF ────────────────────────────────────────────────────────────────
+async function imageToPdf(
+  buffer: Buffer,
+  mime: string
+): Promise<{ buffer: Buffer; mime: string }> {
   const { PDFDocument } = await import("pdf-lib");
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
 
-  // Convert to PNG first (pdf-lib handles PNG and JPG natively)
+  // pdf-lib natively embeds JPG and PNG; convert everything else to PNG first
   let embedBuffer = buffer;
   let embedMime = mime;
   if (!mime.includes("png") && !mime.includes("jpeg") && !mime.includes("jpg")) {
@@ -85,7 +92,7 @@ async function imageToPdf(buffer: Buffer, mime: string): Promise<{ buffer: Buffe
   return { buffer: Buffer.from(await pdfDoc.save()), mime: "application/pdf" };
 }
 
-// ── Audio / Video via FFmpeg ──────────────────────────────────────────────────
+// ── Audio / Video via FFmpeg ───────────────────────────────────────────────────
 async function convertMedia(
   buffer: Buffer,
   inputExt: string,
@@ -120,16 +127,18 @@ async function convertMedia(
     } else if (outputExt === "webm") {
       cmd.videoCodec("libvpx-vp9").audioCodec("libvorbis").outputOptions(["-crf 30", "-b:v 0"]);
     } else if (outputExt === "gif") {
-      // High-quality palette-based GIF, max 480px wide, 10fps
       cmd
         .outputOptions([
-          "-vf", "fps=10,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse",
-          "-loop", "0",
+          "-vf",
+          "fps=10,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse",
+          "-loop",
+          "0",
         ])
         .noAudio();
     }
 
-    cmd.on("end", () => resolve())
+    cmd
+      .on("end", () => resolve())
       .on("error", (err: Error) => reject(err))
       .run();
   });
@@ -154,7 +163,7 @@ async function convertMedia(
   return { buffer: result, mime: mimeMap[outputExt] ?? "application/octet-stream" };
 }
 
-// ── Main route handler ────────────────────────────────────────────────────────
+// ── Main route handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -163,7 +172,10 @@ export async function POST(req: NextRequest) {
     const to = (formData.get("to") as string | null)?.toLowerCase();
 
     if (!file || !from || !to) {
-      return NextResponse.json({ error: "Missing file, from, or to parameter." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing file, from, or to parameter." },
+        { status: 400 }
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -173,48 +185,44 @@ export async function POST(req: NextRequest) {
     let mime: string;
     let ext = to;
 
-    // Formats that Sharp can read as input
-    const imageInputFormats = ["jpg", "jpeg", "png", "webp", "heic", "heif", "svg", "bmp", "tiff", "tif", "gif"];
-    // Formats that Sharp can write as output
+    const imageInputFormats = [
+      "jpg", "jpeg", "png", "webp", "heic", "heif",
+      "svg", "bmp", "tiff", "tif", "gif",
+    ];
     const imageOutputFormats = ["jpg", "jpeg", "png", "webp"];
     const audioFormats = ["mp3", "wav", "m4a", "ogg", "flac", "aac"];
     const videoFormats = ["mp4", "mov", "avi", "webm"];
     const officeFormats = ["docx", "doc", "pptx", "ppt", "xlsx", "xls"];
 
     if (imageInputFormats.includes(from) && imageOutputFormats.includes(to)) {
-      // Image → Image via Sharp
       ({ buffer: resultBuffer, mime } = await convertImage(buffer, to));
       ext = to === "jpeg" ? "jpg" : to;
-
     } else if (imageInputFormats.includes(from) && to === "pdf") {
-      // Image → PDF via pdf-lib
       ({ buffer: resultBuffer, mime } = await imageToPdf(buffer, file.type));
       ext = "pdf";
-
     } else if (from === "pdf" && (to === "jpg" || to === "png")) {
-      // PDF → Image via pdfjs-dist
       ({ buffer: resultBuffer, mime } = await pdfToImage(buffer, to as "jpg" | "png"));
       ext = to;
-
     } else if (
       [...audioFormats, ...videoFormats].includes(from) &&
       [...audioFormats, ...videoFormats, "gif"].includes(to)
     ) {
-      // Audio/Video → Audio/Video/GIF via FFmpeg
       ({ buffer: resultBuffer, mime } = await convertMedia(buffer, from, to));
       ext = to;
-
     } else if (officeFormats.includes(from) || officeFormats.includes(to)) {
-      // Office document conversions — require server-side LibreOffice
-      return NextResponse.json({
-        error:
-          "Office document conversion (Word, PowerPoint, Excel to PDF) is coming very soon! " +
-          "This feature requires our advanced conversion server. " +
-          "In the meantime, try our free PDF, image, audio, and video converters above.",
-      }, { status: 400 });
-
+      return NextResponse.json(
+        {
+          error:
+            "Office document conversion (Word, PowerPoint, Excel to PDF) is coming soon! " +
+            "In the meantime, try our free PDF, image, audio, and video converters.",
+        },
+        { status: 400 }
+      );
     } else {
-      return NextResponse.json({ error: `Unsupported conversion: ${from} → ${to}` }, { status: 400 });
+      return NextResponse.json(
+        { error: `Unsupported conversion: ${from} → ${to}` },
+        { status: 400 }
+      );
     }
 
     const filename = `${originalName}-zapconvert.${ext}`;
@@ -230,6 +238,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unexpected server error.";
+    console.error("[zapconvert] conversion error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

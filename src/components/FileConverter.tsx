@@ -79,8 +79,15 @@ export default function FileConverter({ converter }: { converter: Converter }) {
       setStatus("converting");
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Conversion failed. Please try again.");
+        const text = await res.text().catch(() => "");
+        let errMsg = "Conversion failed. Please try again.";
+        try {
+          const data = JSON.parse(text);
+          if (data.error) errMsg = data.error;
+        } catch {
+          if (text.length > 0 && text.length < 300) errMsg = text;
+        }
+        throw new Error(errMsg);
       }
 
       const blob = await res.blob();
