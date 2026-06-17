@@ -1,0 +1,250 @@
+export interface BlogSection {
+  type: "p" | "h2" | "h3" | "ul" | "ol" | "tip" | "cta";
+  text?: string;
+  items?: string[];
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+export interface BlogPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  readTime: string;
+  content: BlogSection[];
+}
+
+export const blogPosts: BlogPost[] = [
+  {
+    slug: "what-is-webp",
+    title: "What Is WebP and Why Should You Use It?",
+    excerpt: "WebP is a modern image format that delivers smaller files with the same quality. Learn when and why to convert your images to WebP.",
+    date: "2026-06-10",
+    category: "Images",
+    readTime: "4 min read",
+    content: [
+      { type: "p", text: "If you run a website or work with digital images, you have probably heard of WebP. Created by Google in 2010, WebP is a modern image format designed to replace older formats like JPEG and PNG while delivering better compression and quality. In this guide, we explain everything you need to know about WebP and why it matters for you." },
+      { type: "h2", text: "What Is WebP?" },
+      { type: "p", text: "WebP is an image format developed by Google that uses advanced compression algorithms to produce images that are typically 25–35% smaller than equivalent JPEG files and 26% smaller than PNG files — without any visible loss in quality. It supports both lossy and lossless compression, transparency (like PNG), and even animated images (like GIF)." },
+      { type: "p", text: "The format is now supported by all major web browsers including Chrome, Firefox, Safari, Edge, and Opera. This makes it safe to use on any modern website without worrying about compatibility issues." },
+      { type: "h2", text: "Why Should You Convert to WebP?" },
+      { type: "ul", items: [
+        "Faster page loads: Smaller image files mean your website loads faster. Google's own research shows that WebP images are 25–34% smaller than JPEGs of comparable quality.",
+        "Better SEO: Page speed is a confirmed Google ranking factor. Faster sites rank higher in search results, which means more traffic and revenue.",
+        "Lower bandwidth costs: If your website serves millions of images monthly, switching to WebP can cut your CDN and hosting bandwidth bills significantly.",
+        "Transparency support: Unlike JPEG, WebP supports transparent backgrounds — just like PNG — while being much smaller in file size.",
+        "Animation support: WebP can replace GIF for animations, producing files that are often 64% smaller than equivalent GIFs.",
+      ]},
+      { type: "h2", text: "When Should You Stick With JPEG or PNG?" },
+      { type: "p", text: "WebP is the best choice for web use in almost all cases. However, there are situations where JPEG or PNG might be more appropriate:" },
+      { type: "ul", items: [
+        "Email clients: Many email clients do not support WebP yet. Stick with JPEG or PNG for email-embedded images.",
+        "Printing: When you need the highest print quality, use TIFF or uncompressed formats.",
+        "Legacy software: Older image editors and document tools may not support WebP. Always keep a JPEG or PNG backup.",
+      ]},
+      { type: "h2", text: "How to Convert Images to WebP for Free" },
+      { type: "p", text: "Converting your images to WebP is quick and easy with ZapConvert. We support converting JPG to WebP and PNG to WebP directly in your browser — no software downloads, no signup required." },
+      { type: "tip", text: "Pro tip: For the best results, always keep your original image files. Convert to WebP when uploading to your website, but keep the original for editing purposes." },
+      { type: "cta", ctaLabel: "Convert JPG to WebP Free →", ctaHref: "/jpg-to-webp" },
+      { type: "h2", text: "Conclusion" },
+      { type: "p", text: "WebP is the future of web images. It offers significant file size savings over JPEG and PNG, is supported by all major browsers, and can improve your website speed and SEO rankings. If you are not using WebP yet, now is the perfect time to start converting your images." },
+    ],
+  },
+  {
+    slug: "pdf-to-word-guide",
+    title: "How to Convert PDF to Word Without Losing Formatting",
+    excerpt: "Converting PDFs to editable Word documents can be tricky. Here's what to expect and how to get the best results.",
+    date: "2026-06-05",
+    category: "Documents",
+    readTime: "5 min read",
+    content: [
+      { type: "p", text: "PDFs are great for sharing documents that need to look exactly the same on every device. But what happens when you need to edit the content? That is where PDF to Word conversion comes in. In this guide, we walk you through everything you need to know about converting PDF files to editable Word documents." },
+      { type: "h2", text: "Why Convert PDF to Word?" },
+      { type: "ul", items: [
+        "Edit text: PDFs lock your content. Converting to Word lets you change text, fix typos, and update information.",
+        "Reuse content: Extract text, tables, or images from a PDF to use in a new document.",
+        "Apply new formatting: Change fonts, spacing, and layout to match your brand or style guide.",
+        "Translate documents: Most translation tools work better with Word files than PDFs.",
+      ]},
+      { type: "h2", text: "Will the Formatting Be Preserved?" },
+      { type: "p", text: "This is the most common question about PDF-to-Word conversion, and the honest answer is: it depends. PDF files store content differently from Word documents. A PDF describes where everything appears on the page (position, font, color), while a Word document stores the underlying text structure." },
+      { type: "p", text: "For PDFs that were originally created from a Word or similar document (called 'digital PDFs'), conversion usually works very well. Text, headings, and basic formatting are typically preserved accurately." },
+      { type: "p", text: "For scanned PDFs (photos of physical documents), the result depends on Optical Character Recognition (OCR) technology. Without OCR, a scanned PDF is essentially a picture, and conversion will produce a Word document with an embedded image rather than editable text." },
+      { type: "h2", text: "Tips for the Best Conversion Results" },
+      { type: "ol", items: [
+        "Use a digital PDF (not a scanned photo) for the best formatting preservation.",
+        "Check for copy protection: Some PDFs are password-protected or encrypted. Remove the protection before converting.",
+        "Review the output: Always check the converted Word document for any formatting issues before sending or publishing.",
+        "Save both versions: Keep the original PDF and the converted Word file for reference.",
+        "For complex layouts: PDFs with complex multi-column layouts, tables, or custom fonts may lose some formatting. Expect to do minor cleanup in Word.",
+      ]},
+      { type: "h2", text: "How to Convert PDF to JPG for Free" },
+      { type: "p", text: "If you do not need to edit the text but just want to extract images from a PDF, you can convert each PDF page to a JPG image. This is useful for sharing individual pages, using PDF content in presentations, or displaying pages on a website." },
+      { type: "cta", ctaLabel: "Convert PDF to JPG Free →", ctaHref: "/pdf-to-jpg" },
+      { type: "h2", text: "Conclusion" },
+      { type: "p", text: "Converting PDF to Word is one of the most common document tasks. While the results vary depending on the type of PDF, digital PDFs convert very well. Always review the output and make small adjustments if needed. Free online converters like ZapConvert make the process fast and simple — no software required." },
+    ],
+  },
+  {
+    slug: "heic-explained",
+    title: "What Is a HEIC File? (And How to Open It on Windows)",
+    excerpt: "HEIC is the default photo format on iPhones. It's efficient but not universally supported. Here's how to convert it to JPG.",
+    date: "2026-05-28",
+    category: "Images",
+    readTime: "3 min read",
+    content: [
+      { type: "p", text: "If you have ever transferred photos from an iPhone to a Windows PC and found files ending in .heic, you are not alone. Many people encounter HEIC files for the first time and wonder why they can not open them. In this guide, we explain what HEIC is, why Apple uses it, and how to convert HEIC files to JPG so they work everywhere." },
+      { type: "h2", text: "What Is HEIC?" },
+      { type: "p", text: "HEIC stands for High Efficiency Image Container. It is a file format developed by the Moving Picture Experts Group (MPEG) and adopted by Apple in 2017, starting with iOS 11. HEIC uses the HEVC (H.265) video codec to compress images, resulting in files that are roughly 50% smaller than equivalent JPEG files — with the same or better visual quality." },
+      { type: "p", text: "This is why Apple chose HEIC as the default photo format for iPhones: it lets you store twice as many photos in the same amount of storage space." },
+      { type: "h2", text: "Why Can't Windows Open HEIC Files?" },
+      { type: "p", text: "The problem is that HEIC is not a universal standard — it is proprietary technology that requires a license. Windows does not include HEIC support by default, which is why you see errors when trying to open these files. You can install a codec extension from the Microsoft Store to add HEIC support, but the easier solution is to simply convert your HEIC files to JPG." },
+      { type: "h2", text: "HEIC vs JPG: What Is the Difference?" },
+      { type: "ul", items: [
+        "File size: HEIC files are about 50% smaller than equivalent JPG files.",
+        "Quality: HEIC offers better quality at smaller file sizes due to more advanced compression.",
+        "Compatibility: JPG is supported by virtually every device, software, and website on the planet. HEIC is not.",
+        "Editing: JPG is widely supported in photo editors, websites, and social media. HEIC has limited support.",
+      ]},
+      { type: "h2", text: "How to Convert HEIC to JPG for Free" },
+      { type: "p", text: "The fastest way to convert HEIC photos to JPG is using ZapConvert. Simply drag and drop your HEIC file, and get a high-quality JPG back instantly. No app downloads, no signup, and your file is deleted automatically after the conversion." },
+      { type: "tip", text: "You can also change your iPhone settings to save photos as JPG instead of HEIC. Go to Settings → Camera → Formats and choose 'Most Compatible'." },
+      { type: "cta", ctaLabel: "Convert HEIC to JPG Free →", ctaHref: "/heic-to-jpg" },
+      { type: "h2", text: "Conclusion" },
+      { type: "p", text: "HEIC is an efficient format that saves storage space on your iPhone, but it lacks the universal compatibility of JPG. The easiest solution is to convert HEIC to JPG whenever you need to share, edit, or upload photos on non-Apple platforms." },
+    ],
+  },
+  {
+    slug: "compress-audio",
+    title: "MP3 vs WAV: Which Audio Format Should You Use?",
+    excerpt: "Both MP3 and WAV have their place. We break down the differences in quality, file size, and use cases.",
+    date: "2026-05-20",
+    category: "Audio",
+    readTime: "6 min read",
+    content: [
+      { type: "p", text: "When working with audio files, you will quickly encounter two dominant formats: MP3 and WAV. Both are widely supported, but they serve very different purposes. Understanding the differences will help you choose the right format for recording, editing, sharing, and streaming your audio." },
+      { type: "h2", text: "What Is MP3?" },
+      { type: "p", text: "MP3 (MPEG Audio Layer 3) is a compressed audio format introduced in 1993. It uses lossy compression, which means it permanently removes audio information that the human ear is less likely to notice — such as very high frequencies and subtle background sounds. The result is a file that is 90% smaller than the original uncompressed audio, with quality that is acceptable for most casual listening." },
+      { type: "p", text: "A typical 5-minute song saved as an uncompressed WAV file is about 50 MB. The same song as an MP3 at 192 kbps is about 7 MB — a 7x size reduction." },
+      { type: "h2", text: "What Is WAV?" },
+      { type: "p", text: "WAV (Waveform Audio File Format) is an uncompressed audio format developed by Microsoft and IBM in 1991. It stores audio data in raw, unprocessed form, which means the file quality is identical to the original recording. WAV files are large, but they preserve every detail of the audio without any degradation." },
+      { type: "h2", text: "MP3 vs WAV: Head-to-Head Comparison" },
+      { type: "ul", items: [
+        "File size: MP3 wins. A WAV file can be 10x larger than the equivalent MP3.",
+        "Audio quality: WAV wins. It is lossless — every detail of the original audio is preserved.",
+        "Compatibility: Tie. Both formats are supported by virtually all devices, players, and editing software.",
+        "Streaming and sharing: MP3 wins. Smaller file size means faster uploads, downloads, and streaming.",
+        "Professional recording and editing: WAV wins. Producers and sound engineers always record and edit in WAV or other lossless formats.",
+        "Music production: WAV wins. Exporting to WAV preserves all the work done in your digital audio workstation (DAW).",
+      ]},
+      { type: "h2", text: "When to Use MP3" },
+      { type: "ul", items: [
+        "Sharing music with friends or on social media",
+        "Uploading podcasts, audiobooks, or background music to websites",
+        "Storing a large music library on your phone or device",
+        "Streaming audio where bandwidth matters",
+      ]},
+      { type: "h2", text: "When to Use WAV" },
+      { type: "ul", items: [
+        "Recording and producing music in a studio or DAW",
+        "Editing audio for film, video, or broadcast",
+        "Archiving important audio recordings for long-term storage",
+        "Working with audio that will be processed multiple times (conversion degrades quality each time with lossy formats)",
+      ]},
+      { type: "tip", text: "Golden rule: Record and edit in WAV (or another lossless format). Convert to MP3 only for the final distribution version. Never go back from MP3 to WAV expecting lossless quality — the lost audio data is gone forever." },
+      { type: "h2", text: "How to Convert Between MP3 and WAV" },
+      { type: "p", text: "Converting between MP3 and WAV is instant with ZapConvert. Whether you need to convert WAV to MP3 for sharing or MP3 to WAV for editing compatibility, our free online tool handles it in seconds." },
+      { type: "cta", ctaLabel: "Convert WAV to MP3 Free →", ctaHref: "/wav-to-mp3" },
+      { type: "h2", text: "Conclusion" },
+      { type: "p", text: "Use MP3 for sharing and everyday listening. Use WAV for recording, editing, and archiving. Both formats have their strengths, and knowing when to use each one will improve your audio workflow." },
+    ],
+  },
+  {
+    slug: "word-to-pdf-guide",
+    title: "How to Convert Word to PDF: The Complete Free Guide",
+    excerpt: "Learn the easiest ways to convert Microsoft Word documents (.docx) to PDF on any device — free, fast, and without losing formatting.",
+    date: "2026-06-14",
+    category: "Documents",
+    readTime: "5 min read",
+    content: [
+      { type: "p", text: "Converting a Word document to PDF is one of the most common tasks in any office or school. A PDF looks identical on every device — it preserves your fonts, images, tables, and layout perfectly. In this guide, we cover every method to convert DOCX to PDF for free, on Windows, Mac, and mobile." },
+      { type: "h2", text: "Why Convert Word to PDF?" },
+      { type: "ul", items: [
+        "Universal compatibility: PDFs look the same on Windows, Mac, iPhone, Android, and any web browser.",
+        "Professional appearance: PDFs cannot be accidentally edited by the recipient, making them perfect for contracts, resumes, and official documents.",
+        "Smaller file sizes: PDFs are often smaller than Word files, making them easier to email and upload.",
+        "Security: You can password-protect PDFs or restrict editing and printing.",
+        "Print-ready: PDFs are the standard format for professional printing.",
+      ]},
+      { type: "h2", text: "Method 1: Use Microsoft Word (Best Quality)" },
+      { type: "p", text: "If you have Microsoft Word installed, converting to PDF is built in. Open your document in Word, click File → Save As, choose PDF from the format dropdown, and click Save. This method produces the highest quality PDF and perfectly preserves all formatting, including complex tables and graphics." },
+      { type: "h2", text: "Method 2: Use Google Docs (Free, No Software)" },
+      { type: "p", text: "If you do not have Microsoft Office, Google Docs is a free alternative. Upload your .docx file to Google Drive, open it with Google Docs, then click File → Download → PDF Document (.pdf). This method works on any device with a web browser." },
+      { type: "h2", text: "Method 3: Use a Free Online Converter" },
+      { type: "p", text: "For a quick one-off conversion without installing any software or signing in to any account, a free online converter is the fastest option. Simply upload your Word file, and the converted PDF downloads automatically." },
+      { type: "tip", text: "For the best results, always check your converted PDF before sending it. Pay attention to fonts (some custom fonts may not embed correctly), tables (check alignment), and images (make sure they are not blurry)." },
+      { type: "h2", text: "Method 4: Built-in Mac Feature (Mac only)" },
+      { type: "p", text: "On a Mac, you can convert any document to PDF using the built-in print function. Open the Word file, press Command+P to open Print, click the PDF button in the bottom left, and choose 'Save as PDF'. No extra software required." },
+      { type: "h2", text: "Tips for the Best Word-to-PDF Conversion" },
+      { type: "ol", items: [
+        "Embed your fonts: If your document uses custom fonts, make sure they are embedded in the PDF. In Word, go to File → Options → Save and check 'Embed fonts in the file'.",
+        "Check image resolution: Images in Word can look fine on screen but appear blurry in PDF. Use high-resolution images (at least 150 DPI for web, 300 DPI for print).",
+        "Remove tracked changes: Accept or reject all tracked changes before converting to avoid them appearing in the PDF.",
+        "Check margins and page size: Make sure your page size (A4 or Letter) matches your intended print or display format.",
+        "Test on different devices: Open the final PDF on both a computer and a phone to make sure it looks correct.",
+      ]},
+      { type: "cta", ctaLabel: "Convert Word to PDF Free →", ctaHref: "/word-to-pdf" },
+      { type: "h2", text: "Conclusion" },
+      { type: "p", text: "Converting Word documents to PDF is simple once you know your options. For the highest quality, use Microsoft Word or Google Docs directly. For a quick conversion without any software, free online tools like ZapConvert are your best friend." },
+    ],
+  },
+  {
+    slug: "what-is-svg",
+    title: "What Is an SVG File? A Complete Guide to Vector Graphics",
+    excerpt: "SVG files are perfect for logos and icons because they scale to any size without losing quality. Learn what SVG is and when to use it.",
+    date: "2026-06-12",
+    category: "Images",
+    readTime: "4 min read",
+    content: [
+      { type: "p", text: "You have probably seen files ending in .svg — especially when working with logos, icons, and web graphics. SVG stands for Scalable Vector Graphics, and it works completely differently from JPG, PNG, or WebP. Understanding SVG will help you know when to use it, and when to convert to a raster format like PNG or JPG." },
+      { type: "h2", text: "What Makes SVG Different?" },
+      { type: "p", text: "Most image formats (JPG, PNG, WebP, GIF) are raster images. They store images as a grid of colored pixels. When you zoom in or scale them up, they become blurry because there are not enough pixels to show the detail." },
+      { type: "p", text: "SVG works differently. Instead of pixels, SVG uses mathematical descriptions of shapes — lines, curves, and paths. This means an SVG image can be scaled to any size — from a 16x16 favicon to a 10-foot billboard — without any loss of quality. The edges always stay perfectly sharp." },
+      { type: "h2", text: "What Is SVG Used For?" },
+      { type: "ul", items: [
+        "Logos: Company logos need to look perfect at any size — from a small website header to a large sign.",
+        "Icons: UI icons in apps and websites are often SVG so they stay sharp on high-resolution (Retina) displays.",
+        "Illustrations: Simple illustrations and infographics work well as SVGs because they stay crisp at any zoom level.",
+        "Animations: SVGs can be animated with CSS or JavaScript, creating lightweight web animations.",
+        "Charts and diagrams: Technical drawings and data visualizations benefit from the infinite scalability of SVG.",
+      ]},
+      { type: "h2", text: "SVG Limitations" },
+      { type: "ul", items: [
+        "Not for photographs: Photos have millions of colors and gradients that are better compressed as JPEG or WebP. SVG is not suitable for photographic content.",
+        "Complex files can be large: Very detailed illustrations with many paths can result in large SVG files.",
+        "Not universally supported in document software: Some older document editors and PDF tools do not support SVG images.",
+      ]},
+      { type: "h2", text: "When to Convert SVG to PNG or JPG" },
+      { type: "p", text: "While SVG is ideal for web use, there are situations where you need to convert an SVG to a raster format like PNG or JPG:" },
+      { type: "ul", items: [
+        "Social media: Most social platforms do not accept SVG uploads. Convert to PNG or JPG first.",
+        "Email: Email clients have limited SVG support. Use PNG for email graphics.",
+        "Document use: When inserting a logo into a Word or PowerPoint document, PNG works more reliably than SVG.",
+        "Mobile apps: Some app frameworks require PNG or JPG assets rather than SVG.",
+        "Printing without a vector-capable tool: If your printer or print service needs a raster file, export to PNG at 300 DPI.",
+      ]},
+      { type: "h2", text: "How to Convert SVG to PNG for Free" },
+      { type: "p", text: "Converting an SVG to PNG is quick with ZapConvert. Upload your SVG file and download a high-quality PNG in seconds — no software needed, no signup required." },
+      { type: "tip", text: "When converting SVG to PNG, the output size depends on the dimensions defined in your SVG file. If you need a specific pixel size, resize the SVG in a vector editor (like Inkscape or Figma) before converting." },
+      { type: "cta", ctaLabel: "Convert SVG to PNG Free →", ctaHref: "/svg-to-png" },
+      { type: "h2", text: "Conclusion" },
+      { type: "p", text: "SVG is the best format for logos, icons, and illustrations because it scales perfectly to any size. Use SVG for web graphics whenever possible, and convert to PNG or JPG when you need compatibility with platforms and software that do not support SVG." },
+    ],
+  },
+];
+
+export function getBlogPost(slug: string): BlogPost | undefined {
+  return blogPosts.find((p) => p.slug === slug);
+}

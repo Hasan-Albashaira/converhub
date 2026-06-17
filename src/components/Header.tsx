@@ -24,6 +24,8 @@ export default function Header() {
             <Link href="/" className="hover:text-indigo-600 transition-colors">Tools</Link>
             <Link href="/pricing" className="hover:text-indigo-600 transition-colors">Pricing</Link>
             <Link href="/blog" className="hover:text-indigo-600 transition-colors">Blog</Link>
+            <Link href="/about" className="hover:text-indigo-600 transition-colors">About</Link>
+            <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
             <Link href="/pricing" className="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
               Go Pro
             </Link>
@@ -49,6 +51,8 @@ export default function Header() {
             <Link href="/" className="hover:text-indigo-600">Tools</Link>
             <Link href="/pricing" className="hover:text-indigo-600">Pricing</Link>
             <Link href="/blog" className="hover:text-indigo-600">Blog</Link>
+            <Link href="/about" className="hover:text-indigo-600">About</Link>
+            <Link href="/contact" className="hover:text-indigo-600">Contact</Link>
             <Link href="/pricing" className="w-fit px-4 py-2 bg-indigo-600 text-white rounded-lg">Go Pro</Link>
           </div>
         )}

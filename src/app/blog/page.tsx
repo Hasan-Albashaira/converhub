@@ -1,45 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { blogPosts } from "@/lib/blog-posts";
 
 export const metadata: Metadata = {
   title: "Blog — ZapConvert",
-  description: "Tips, guides, and tutorials on file conversion and document management.",
+  description: "Tips, guides, and tutorials on file conversion, document management, and image formats.",
 };
-
-const posts = [
-  {
-    slug: "what-is-webp",
-    title: "What Is WebP and Why Should You Use It?",
-    excerpt: "WebP is a modern image format that delivers smaller files with the same quality. Learn when and why to convert your images to WebP.",
-    date: "2026-06-10",
-    category: "Images",
-    readTime: "4 min read",
-  },
-  {
-    slug: "pdf-to-word-guide",
-    title: "How to Convert PDF to Word Without Losing Formatting",
-    excerpt: "Converting PDFs to editable Word documents can be tricky. Here's what to expect and how to get the best results.",
-    date: "2026-06-05",
-    category: "Documents",
-    readTime: "5 min read",
-  },
-  {
-    slug: "heic-explained",
-    title: "What Is a HEIC File? (And How to Open It on Windows)",
-    excerpt: "HEIC is the default photo format on iPhones. It's efficient but not universally supported. Here's how to convert it to JPG.",
-    date: "2026-05-28",
-    category: "Images",
-    readTime: "3 min read",
-  },
-  {
-    slug: "compress-audio",
-    title: "MP3 vs WAV: Which Audio Format Should You Use?",
-    excerpt: "Both MP3 and WAV have their place. We break down the differences in quality, file size, and use cases.",
-    date: "2026-05-20",
-    category: "Audio",
-    readTime: "6 min read",
-  },
-];
 
 export default function BlogPage() {
   return (
@@ -47,7 +13,7 @@ export default function BlogPage() {
       <h1 className="text-4xl font-extrabold text-slate-900 mb-2">Blog</h1>
       <p className="text-slate-500 mb-10">Guides, tips, and tutorials on file formats and conversion.</p>
       <div className="grid gap-6">
-        {posts.map((post) => (
+        {blogPosts.map((post) => (
           <article
             key={post.slug}
             className="bg-white border border-slate-200 rounded-2xl p-6 hover:border-indigo-300 hover:shadow-sm transition-all"

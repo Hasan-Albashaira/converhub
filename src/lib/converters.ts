@@ -13,7 +13,7 @@ export interface Converter {
 }
 
 export const converters: Converter[] = [
-  // Documents
+  // ── Documents ────────────────────────────────────────────────────────────────
   {
     from: "pdf", to: "jpg", label: "PDF to JPG", slug: "pdf-to-jpg",
     category: "document", icon: "📄",
@@ -32,7 +32,38 @@ export const converters: Converter[] = [
     description: "Convert PNG images into a PDF document.",
     acceptedMime: ["image/png"], maxSizeMB: 25,
   },
-  // Images
+  {
+    from: "docx", to: "pdf", label: "Word to PDF", slug: "word-to-pdf",
+    category: "document", icon: "📝",
+    description: "Convert Microsoft Word DOCX documents to PDF format.",
+    acceptedMime: [
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/msword",
+    ],
+    maxSizeMB: 25,
+  },
+  {
+    from: "pptx", to: "pdf", label: "PPT to PDF", slug: "ppt-to-pdf",
+    category: "document", icon: "📊",
+    description: "Convert PowerPoint PPTX presentations to PDF format.",
+    acceptedMime: [
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-powerpoint",
+    ],
+    maxSizeMB: 50,
+  },
+  {
+    from: "xlsx", to: "pdf", label: "Excel to PDF", slug: "excel-to-pdf",
+    category: "document", icon: "📊",
+    description: "Convert Microsoft Excel spreadsheets to PDF format.",
+    acceptedMime: [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+    ],
+    maxSizeMB: 25,
+  },
+
+  // ── Images ───────────────────────────────────────────────────────────────────
   {
     from: "jpg", to: "png", label: "JPG to PNG", slug: "jpg-to-png",
     category: "image", icon: "🖼️",
@@ -75,7 +106,56 @@ export const converters: Converter[] = [
     description: "Convert iPhone HEIC photos to universally compatible JPG.",
     acceptedMime: ["image/heic", "image/heif"], maxSizeMB: 25,
   },
-  // Audio
+  {
+    from: "svg", to: "png", label: "SVG to PNG", slug: "svg-to-png",
+    category: "image", icon: "🎨",
+    description: "Convert SVG vector graphics to PNG raster images.",
+    acceptedMime: ["image/svg+xml"], maxSizeMB: 10,
+  },
+  {
+    from: "svg", to: "jpg", label: "SVG to JPG", slug: "svg-to-jpg",
+    category: "image", icon: "🎨",
+    description: "Convert SVG vector graphics to JPG format.",
+    acceptedMime: ["image/svg+xml"], maxSizeMB: 10,
+  },
+  {
+    from: "bmp", to: "jpg", label: "BMP to JPG", slug: "bmp-to-jpg",
+    category: "image", icon: "🖼️",
+    description: "Convert BMP bitmap images to compressed JPG format.",
+    acceptedMime: ["image/bmp", "image/x-bmp"], maxSizeMB: 25,
+  },
+  {
+    from: "bmp", to: "png", label: "BMP to PNG", slug: "bmp-to-png",
+    category: "image", icon: "🖼️",
+    description: "Convert BMP bitmap images to lossless PNG format.",
+    acceptedMime: ["image/bmp", "image/x-bmp"], maxSizeMB: 25,
+  },
+  {
+    from: "tiff", to: "jpg", label: "TIFF to JPG", slug: "tiff-to-jpg",
+    category: "image", icon: "🖼️",
+    description: "Convert TIFF images to compressed JPG format.",
+    acceptedMime: ["image/tiff", "image/tif"], maxSizeMB: 50,
+  },
+  {
+    from: "tiff", to: "png", label: "TIFF to PNG", slug: "tiff-to-png",
+    category: "image", icon: "🖼️",
+    description: "Convert TIFF images to PNG format.",
+    acceptedMime: ["image/tiff", "image/tif"], maxSizeMB: 50,
+  },
+  {
+    from: "gif", to: "jpg", label: "GIF to JPG", slug: "gif-to-jpg",
+    category: "image", icon: "🖼️",
+    description: "Convert GIF images (first frame) to JPG format.",
+    acceptedMime: ["image/gif"], maxSizeMB: 15,
+  },
+  {
+    from: "gif", to: "png", label: "GIF to PNG", slug: "gif-to-png",
+    category: "image", icon: "🖼️",
+    description: "Convert GIF images (first frame) to PNG format.",
+    acceptedMime: ["image/gif"], maxSizeMB: 15,
+  },
+
+  // ── Audio ────────────────────────────────────────────────────────────────────
   {
     from: "mp3", to: "wav", label: "MP3 to WAV", slug: "mp3-to-wav",
     category: "audio", icon: "🎵",
@@ -100,7 +180,32 @@ export const converters: Converter[] = [
     description: "Convert OGG Vorbis audio files to MP3.",
     acceptedMime: ["audio/ogg"], maxSizeMB: 50,
   },
-  // Video
+  {
+    from: "wav", to: "ogg", label: "WAV to OGG", slug: "wav-to-ogg",
+    category: "audio", icon: "🎵",
+    description: "Convert WAV audio to compressed OGG Vorbis format.",
+    acceptedMime: ["audio/wav", "audio/x-wav"], maxSizeMB: 50,
+  },
+  {
+    from: "mp3", to: "ogg", label: "MP3 to OGG", slug: "mp3-to-ogg",
+    category: "audio", icon: "🎵",
+    description: "Convert MP3 files to open-source OGG Vorbis format.",
+    acceptedMime: ["audio/mpeg", "audio/mp3"], maxSizeMB: 50,
+  },
+  {
+    from: "ogg", to: "wav", label: "OGG to WAV", slug: "ogg-to-wav",
+    category: "audio", icon: "🎵",
+    description: "Convert OGG files to uncompressed WAV format.",
+    acceptedMime: ["audio/ogg"], maxSizeMB: 50,
+  },
+  {
+    from: "flac", to: "mp3", label: "FLAC to MP3", slug: "flac-to-mp3",
+    category: "audio", icon: "🎵",
+    description: "Convert lossless FLAC audio files to compressed MP3 format.",
+    acceptedMime: ["audio/flac", "audio/x-flac"], maxSizeMB: 100,
+  },
+
+  // ── Video ────────────────────────────────────────────────────────────────────
   {
     from: "mp4", to: "mp3", label: "MP4 to MP3", slug: "mp4-to-mp3",
     category: "video", icon: "🎬",
@@ -124,6 +229,30 @@ export const converters: Converter[] = [
     category: "video", icon: "🎬",
     description: "Convert WebM web videos to universally compatible MP4.",
     acceptedMime: ["video/webm"], maxSizeMB: 100,
+  },
+  {
+    from: "mp4", to: "webm", label: "MP4 to WebM", slug: "mp4-to-webm",
+    category: "video", icon: "🎬",
+    description: "Convert MP4 videos to WebM format for web use.",
+    acceptedMime: ["video/mp4"], maxSizeMB: 100,
+  },
+  {
+    from: "mov", to: "webm", label: "MOV to WebM", slug: "mov-to-webm",
+    category: "video", icon: "🎬",
+    description: "Convert QuickTime MOV videos to WebM format.",
+    acceptedMime: ["video/quicktime"], maxSizeMB: 100,
+  },
+  {
+    from: "avi", to: "webm", label: "AVI to WebM", slug: "avi-to-webm",
+    category: "video", icon: "🎬",
+    description: "Convert AVI video files to WebM format.",
+    acceptedMime: ["video/x-msvideo", "video/avi"], maxSizeMB: 100,
+  },
+  {
+    from: "mp4", to: "gif", label: "MP4 to GIF", slug: "mp4-to-gif",
+    category: "video", icon: "🎬",
+    description: "Convert short MP4 video clips to animated GIF images.",
+    acceptedMime: ["video/mp4"], maxSizeMB: 50,
   },
 ];
 

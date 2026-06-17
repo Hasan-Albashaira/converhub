@@ -7,16 +7,16 @@ import { randomUUID } from "crypto";
 
 export const config = { api: { bodyParser: false } };
 
-// ── Image conversion ──────────────────────────────────────────────────────────
+// ── Image conversion (Sharp handles JPG, PNG, WebP, SVG, BMP, TIFF, GIF) ─────
 async function convertImage(
   buffer: Buffer,
   to: string
 ): Promise<{ buffer: Buffer; mime: string }> {
-  const pipeline = sharp(buffer);
+  const pipeline = sharp(buffer, { failOnError: false });
   switch (to) {
     case "jpg":
     case "jpeg":
-      return { buffer: await pipeline.jpeg({ quality: 90 }).toBuffer(), mime: "image/jpeg" };
+      return { buffer: await pipeline.flatten({ background: "#ffffff" }).jpeg({ quality: 90 }).toBuffer(), mime: "image/jpeg" };
     case "png":
       return { buffer: await pipeline.png().toBuffer(), mime: "image/png" };
     case "webp":
@@ -60,14 +60,23 @@ async function pdfToImage(
 }
 
 // ── Image → PDF ───────────────────────────────────────────────────────────────
-async function imagesToPdf(buffer: Buffer, mime: string): Promise<{ buffer: Buffer; mime: string }> {
+async function imageToPdf(buffer: Buffer, mime: string): Promise<{ buffer: Buffer; mime: string }> {
   const { PDFDocument } = await import("pdf-lib");
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
 
-  const img = mime.includes("png")
-    ? await pdfDoc.embedPng(new Uint8Array(buffer))
-    : await pdfDoc.embedJpg(new Uint8Array(buffer));
+  // Convert to PNG first (pdf-lib handles PNG and JPG natively)
+  let embedBuffer = buffer;
+  let embedMime = mime;
+  if (!mime.includes("png") && !mime.includes("jpeg") && !mime.includes("jpg")) {
+    const converted = await convertImage(buffer, "png");
+    embedBuffer = converted.buffer;
+    embedMime = "image/png";
+  }
+
+  const img = embedMime.includes("png")
+    ? await pdfDoc.embedPng(new Uint8Array(embedBuffer))
+    : await pdfDoc.embedJpg(new Uint8Array(embedBuffer));
 
   const { width, height } = img.scale(1);
   page.setSize(width, height);
@@ -84,14 +93,12 @@ async function convertMedia(
 ): Promise<{ buffer: Buffer; mime: string }> {
   const ffmpeg = (await import("fluent-ffmpeg")).default;
 
-  // Point to the exact FFmpeg binary location (works on Windows dev + Linux servers)
   const ffmpegPath =
     process.platform === "win32"
       ? "C:\\Users\\DELL\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.exe"
       : "ffmpeg";
   ffmpeg.setFfmpegPath(ffmpegPath);
 
-  // Write input to a temp file
   const tmpDir = os.tmpdir();
   const id = randomUUID();
   const inputPath = path.join(tmpDir, `${id}-input.${inputExt}`);
@@ -102,13 +109,24 @@ async function convertMedia(
   await new Promise<void>((resolve, reject) => {
     const cmd = ffmpeg(inputPath).output(outputPath);
 
-    // Format-specific settings for best quality / smallest size
     if (outputExt === "mp3") {
       cmd.audioCodec("libmp3lame").audioBitrate("192k").noVideo();
     } else if (outputExt === "wav") {
       cmd.audioCodec("pcm_s16le").noVideo();
+    } else if (outputExt === "ogg") {
+      cmd.audioCodec("libvorbis").noVideo();
     } else if (outputExt === "mp4") {
       cmd.videoCodec("libx264").audioCodec("aac").outputOptions(["-crf 23", "-preset fast"]);
+    } else if (outputExt === "webm") {
+      cmd.videoCodec("libvpx-vp9").audioCodec("libvorbis").outputOptions(["-crf 30", "-b:v 0"]);
+    } else if (outputExt === "gif") {
+      // High-quality palette-based GIF, max 480px wide, 10fps
+      cmd
+        .outputOptions([
+          "-vf", "fps=10,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse",
+          "-loop", "0",
+        ])
+        .noAudio();
     }
 
     cmd.on("end", () => resolve())
@@ -118,16 +136,19 @@ async function convertMedia(
 
   const result = await fs.readFile(outputPath);
 
-  // Clean up temp files
   await fs.unlink(inputPath).catch(() => {});
   await fs.unlink(outputPath).catch(() => {});
 
   const mimeMap: Record<string, string> = {
     mp3: "audio/mpeg",
     wav: "audio/wav",
-    mp4: "video/mp4",
-    m4a: "audio/mp4",
     ogg: "audio/ogg",
+    flac: "audio/flac",
+    mp4: "video/mp4",
+    webm: "video/webm",
+    mov: "video/quicktime",
+    avi: "video/x-msvideo",
+    gif: "image/gif",
   };
 
   return { buffer: result, mime: mimeMap[outputExt] ?? "application/octet-stream" };
@@ -152,19 +173,46 @@ export async function POST(req: NextRequest) {
     let mime: string;
     let ext = to;
 
-    const imageFormats = ["jpg", "jpeg", "png", "webp", "heic"];
-    const audioFormats = ["mp3", "wav", "m4a", "ogg"];
+    // Formats that Sharp can read as input
+    const imageInputFormats = ["jpg", "jpeg", "png", "webp", "heic", "heif", "svg", "bmp", "tiff", "tif", "gif"];
+    // Formats that Sharp can write as output
+    const imageOutputFormats = ["jpg", "jpeg", "png", "webp"];
+    const audioFormats = ["mp3", "wav", "m4a", "ogg", "flac", "aac"];
     const videoFormats = ["mp4", "mov", "avi", "webm"];
+    const officeFormats = ["docx", "doc", "pptx", "ppt", "xlsx", "xls"];
 
-    if (imageFormats.includes(from) && imageFormats.filter(f => f !== "heic").includes(to)) {
+    if (imageInputFormats.includes(from) && imageOutputFormats.includes(to)) {
+      // Image → Image via Sharp
       ({ buffer: resultBuffer, mime } = await convertImage(buffer, to));
       ext = to === "jpeg" ? "jpg" : to;
-    } else if (["jpg", "jpeg", "png"].includes(from) && to === "pdf") {
-      ({ buffer: resultBuffer, mime } = await imagesToPdf(buffer, file.type));
+
+    } else if (imageInputFormats.includes(from) && to === "pdf") {
+      // Image → PDF via pdf-lib
+      ({ buffer: resultBuffer, mime } = await imageToPdf(buffer, file.type));
+      ext = "pdf";
+
     } else if (from === "pdf" && (to === "jpg" || to === "png")) {
-      ({ buffer: resultBuffer, mime } = await pdfToImage(buffer, to));
-    } else if ([...audioFormats, ...videoFormats].includes(from) && [...audioFormats, ...videoFormats].includes(to)) {
+      // PDF → Image via pdfjs-dist
+      ({ buffer: resultBuffer, mime } = await pdfToImage(buffer, to as "jpg" | "png"));
+      ext = to;
+
+    } else if (
+      [...audioFormats, ...videoFormats].includes(from) &&
+      [...audioFormats, ...videoFormats, "gif"].includes(to)
+    ) {
+      // Audio/Video → Audio/Video/GIF via FFmpeg
       ({ buffer: resultBuffer, mime } = await convertMedia(buffer, from, to));
+      ext = to;
+
+    } else if (officeFormats.includes(from) || officeFormats.includes(to)) {
+      // Office document conversions — require server-side LibreOffice
+      return NextResponse.json({
+        error:
+          "Office document conversion (Word, PowerPoint, Excel to PDF) is coming very soon! " +
+          "This feature requires our advanced conversion server. " +
+          "In the meantime, try our free PDF, image, audio, and video converters above.",
+      }, { status: 400 });
+
     } else {
       return NextResponse.json({ error: `Unsupported conversion: ${from} → ${to}` }, { status: 400 });
     }
