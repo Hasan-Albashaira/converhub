@@ -12,7 +12,7 @@ async function convertImage(
   // Dynamic import so a missing Sharp binary only breaks image conversions,
   // not the entire API route module.
   const sharp = (await import("sharp")).default;
-  const pipeline = sharp(buffer, { failOnError: false });
+  const pipeline = sharp(buffer, { failOn: "none" });
 
   switch (to) {
     case "jpg":
