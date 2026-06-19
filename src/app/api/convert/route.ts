@@ -4,33 +4,47 @@ import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
 
-// ── Image conversion (Sharp) ───────────────────────────────────────────────────
+// ── Image conversion via @napi-rs/canvas (no libvips dependency) ──────────────
+// Sharp 0.33+ requires system libvips which is not on Vercel. We use
+// @napi-rs/canvas (Skia-based, statically bundled) instead.
 async function convertImage(
   buffer: Buffer,
   to: string
 ): Promise<{ buffer: Buffer; mime: string }> {
-  // Dynamic import so a missing Sharp binary only breaks image conversions,
-  // not the entire API route module.
-  const sharp = (await import("sharp")).default;
-  const pipeline = sharp(buffer, { failOn: "none" });
+  const { createCanvas, Image } = await import("@napi-rs/canvas");
+
+  const img = new Image();
+  img.src = buffer; // synchronous in Node.js (not browser)
+
+  if (img.width === 0 || img.height === 0) {
+    throw new Error("Could not decode image. The format may not be supported.");
+  }
+
+  const canvas = createCanvas(img.width, img.height);
+  const ctx = canvas.getContext("2d");
+
+  // Fill white background before drawing — JPG has no transparency
+  if (to === "jpg" || to === "jpeg") {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  ctx.drawImage(img, 0, 0);
 
   switch (to) {
     case "jpg":
     case "jpeg":
-      return {
-        buffer: await pipeline.flatten({ background: "#ffffff" }).jpeg({ quality: 90 }).toBuffer(),
-        mime: "image/jpeg",
-      };
+      return { buffer: canvas.toBuffer("image/jpeg"), mime: "image/jpeg" };
     case "png":
-      return { buffer: await pipeline.png().toBuffer(), mime: "image/png" };
+      return { buffer: canvas.toBuffer("image/png"), mime: "image/png" };
     case "webp":
-      return { buffer: await pipeline.webp({ quality: 85 }).toBuffer(), mime: "image/webp" };
+      return { buffer: canvas.toBuffer("image/webp"), mime: "image/webp" };
     default:
       throw new Error(`Unsupported image output format: ${to}`);
   }
 }
 
-// ── PDF → image ────────────────────────────────────────────────────────────────
+// ── PDF → image (pdfjs-dist + @napi-rs/canvas) ────────────────────────────────
 async function pdfToImage(
   buffer: Buffer,
   outputFormat: "jpg" | "png"
@@ -63,19 +77,19 @@ async function pdfToImage(
   };
 }
 
-// ── Image → PDF ────────────────────────────────────────────────────────────────
+// ── Image → PDF (pdf-lib, pure JS) ────────────────────────────────────────────
 async function imageToPdf(
   buffer: Buffer,
-  mime: string
+  inputMime: string
 ): Promise<{ buffer: Buffer; mime: string }> {
   const { PDFDocument } = await import("pdf-lib");
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
 
-  // pdf-lib natively embeds JPG and PNG; convert everything else to PNG first
+  // pdf-lib only embeds JPEG and PNG natively; convert everything else to PNG first
   let embedBuffer = buffer;
-  let embedMime = mime;
-  if (!mime.includes("png") && !mime.includes("jpeg") && !mime.includes("jpg")) {
+  let embedMime = inputMime;
+  if (!inputMime.includes("png") && !inputMime.includes("jpeg") && !inputMime.includes("jpg")) {
     const converted = await convertImage(buffer, "png");
     embedBuffer = converted.buffer;
     embedMime = "image/png";
@@ -92,19 +106,16 @@ async function imageToPdf(
   return { buffer: Buffer.from(await pdfDoc.save()), mime: "application/pdf" };
 }
 
-// ── Audio / Video via FFmpeg ───────────────────────────────────────────────────
+// ── Audio / Video via FFmpeg (ffmpeg-static bundles the binary) ───────────────
 async function convertMedia(
   buffer: Buffer,
   inputExt: string,
   outputExt: string
 ): Promise<{ buffer: Buffer; mime: string }> {
   const ffmpeg = (await import("fluent-ffmpeg")).default;
-
-  const ffmpegPath =
-    process.platform === "win32"
-      ? "C:\\Users\\DELL\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.exe"
-      : "ffmpeg";
-  ffmpeg.setFfmpegPath(ffmpegPath);
+  // ffmpeg-static provides the correct binary path for the current OS/arch
+  const ffmpegStatic = (await import("ffmpeg-static")).default;
+  ffmpeg.setFfmpegPath(ffmpegStatic as string);
 
   const tmpDir = os.tmpdir();
   const id = randomUUID();
@@ -144,7 +155,6 @@ async function convertMedia(
   });
 
   const result = await fs.readFile(outputPath);
-
   await fs.unlink(inputPath).catch(() => {});
   await fs.unlink(outputPath).catch(() => {});
 
@@ -185,14 +195,25 @@ export async function POST(req: NextRequest) {
     let mime: string;
     let ext = to;
 
+    // Formats @napi-rs/canvas Image class can decode
     const imageInputFormats = [
-      "jpg", "jpeg", "png", "webp", "heic", "heif",
-      "svg", "bmp", "tiff", "tif", "gif",
+      "jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff", "tif", "svg",
     ];
     const imageOutputFormats = ["jpg", "jpeg", "png", "webp"];
     const audioFormats = ["mp3", "wav", "m4a", "ogg", "flac", "aac"];
     const videoFormats = ["mp4", "mov", "avi", "webm"];
     const officeFormats = ["docx", "doc", "pptx", "ppt", "xlsx", "xls"];
+
+    if (from === "heic" || from === "heif") {
+      return NextResponse.json(
+        {
+          error:
+            "HEIC conversion requires native system libraries not available on this server. " +
+            "On iPhone, share the photo and choose 'Most Compatible' to get a JPG instead.",
+        },
+        { status: 400 }
+      );
+    }
 
     if (imageInputFormats.includes(from) && imageOutputFormats.includes(to)) {
       ({ buffer: resultBuffer, mime } = await convertImage(buffer, to));

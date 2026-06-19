@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["sharp", "pdfjs-dist", "@napi-rs/canvas", "fluent-ffmpeg"],
-  // Force Vercel to bundle these files that pdfjs-dist and @napi-rs/canvas
-  // load dynamically (not automatically traced by Next.js)
+  serverExternalPackages: ["@napi-rs/canvas", "pdfjs-dist", "fluent-ffmpeg", "ffmpeg-static"],
+  // Force Vercel to include native binaries that are dynamically loaded
+  // but not automatically traced by Next.js's file tracer
   outputFileTracingIncludes: {
     "/api/convert": [
       "./node_modules/pdfjs-dist/**/*",
       "./node_modules/@napi-rs/canvas/**/*",
+      "./node_modules/ffmpeg-static/**/*",
     ],
   },
 };
