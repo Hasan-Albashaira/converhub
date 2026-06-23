@@ -173,10 +173,21 @@ async function convertMedia(
   return { buffer: result, mime: mimeMap[outputExt] ?? "application/octet-stream" };
 }
 
-// ── Office → PDF via LibreOffice headless ─────────────────────────────────────
+// ── LibreOffice conversion (Office↔PDF, PDF→DOCX, etc.) ──────────────────────
+const officeMime: Record<string, string> = {
+  pdf:  "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  doc:  "application/msword",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ppt:  "application/vnd.ms-powerpoint",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  xls:  "application/vnd.ms-excel",
+};
+
 async function convertOffice(
   buffer: Buffer,
-  inputExt: string
+  inputExt: string,
+  outputExt: string = "pdf"
 ): Promise<{ buffer: Buffer; mime: string }> {
   const { exec } = await import("child_process");
   const { promisify } = await import("util");
@@ -186,8 +197,8 @@ async function convertOffice(
   const tmpDir = os.tmpdir();
   const loHome = path.join(tmpDir, `lo-${id}`);
   const inputPath = path.join(tmpDir, `${id}.${inputExt}`);
-  // LibreOffice names output as <basename>.pdf in --outdir
-  const outputPath = path.join(tmpDir, `${id}.pdf`);
+  // LibreOffice names output as <basename>.<outputExt> in --outdir
+  const outputPath = path.join(tmpDir, `${id}.${outputExt}`);
 
   await fs.mkdir(loHome, { recursive: true });
   await fs.writeFile(inputPath, buffer);
@@ -205,14 +216,17 @@ async function convertOffice(
       loError = err instanceof Error ? err.message : String(err);
     }
 
-    // LibreOffice sometimes exits non-zero despite successfully creating the PDF.
+    // LibreOffice sometimes exits non-zero despite successfully creating the output.
     // Check whether the output file actually exists before reporting failure.
     try {
       const result = await fs.readFile(outputPath);
-      return { buffer: Buffer.from(result), mime: "application/pdf" };
+      return {
+        buffer: Buffer.from(result),
+        mime: officeMime[outputExt] ?? "application/octet-stream",
+      };
     } catch {
       throw new Error(
-        loError || "Office conversion failed. The document may use unsupported features."
+        loError || "Conversion failed. The document may use unsupported features."
       );
     }
   } finally {
@@ -280,8 +294,11 @@ export async function POST(req: NextRequest) {
       ({ buffer: resultBuffer, mime } = await convertMedia(buffer, from, to));
       ext = to;
     } else if (officeFormats.includes(from) && to === "pdf") {
-      ({ buffer: resultBuffer, mime } = await convertOffice(buffer, from));
+      ({ buffer: resultBuffer, mime } = await convertOffice(buffer, from, "pdf"));
       ext = "pdf";
+    } else if (from === "pdf" && to === "docx") {
+      ({ buffer: resultBuffer, mime } = await convertOffice(buffer, "pdf", "docx"));
+      ext = "docx";
     } else {
       return NextResponse.json(
         { error: `Unsupported conversion: ${from} → ${to}` },

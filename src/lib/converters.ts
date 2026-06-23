@@ -33,6 +33,12 @@ export const converters: Converter[] = [
     acceptedMime: ["image/png"], maxSizeMB: 25,
   },
   {
+    from: "pdf", to: "docx", label: "PDF to Word", slug: "pdf-to-word",
+    category: "document", icon: "📄",
+    description: "Convert PDF files to editable Microsoft Word DOCX documents.",
+    acceptedMime: ["application/pdf"], maxSizeMB: 25,
+  },
+  {
     from: "docx", to: "pdf", label: "Word to PDF", slug: "word-to-pdf",
     category: "document", icon: "📝",
     description: "Convert Microsoft Word DOCX documents to PDF format.",
