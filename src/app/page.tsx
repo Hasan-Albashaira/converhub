@@ -2,13 +2,13 @@ import Link from "next/link";
 import { converters, getConvertersByCategory, categoryColors, categoryLabels, type ConverterCategory } from "@/lib/converters";
 
 const stats = [
-  { value: "18+", label: "File formats" },
+  { value: "36+", label: "File formats" },
   { value: "100%", label: "Free to start" },
   { value: "1 hr", label: "Auto file delete" },
   { value: "256-bit", label: "SSL encryption" },
 ];
 
-const popularSlugs = ["pdf-to-jpg", "jpg-to-png", "mp4-to-mp3", "png-to-jpg", "wav-to-mp3", "mov-to-mp4"];
+const popularSlugs = ["pdf-to-word", "word-to-pdf", "pdf-to-jpg", "jpg-to-png", "mp4-to-mp3", "mov-to-mp4"];
 
 export default function HomePage() {
   const byCategory = getConvertersByCategory();
@@ -120,7 +120,7 @@ export default function HomePage() {
         <p className="text-slate-500 text-center mb-10">Three steps. That&apos;s it.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { step: "1", title: "Choose a tool", desc: "Pick the converter you need from our library of 18+ tools.", icon: "🔍" },
+            { step: "1", title: "Choose a tool", desc: "Pick the converter you need from our library of 36+ tools.", icon: "🔍" },
             { step: "2", title: "Upload your file", desc: "Drag and drop or click to browse. Up to 25 MB on the free tier.", icon: "📁" },
             { step: "3", title: "Download the result", desc: "Your converted file is ready in seconds. Files auto-deleted after 1 hour.", icon: "⬇️" },
           ].map((item) => (
