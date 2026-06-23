@@ -209,7 +209,7 @@ async function convertOffice(
     let loError = "";
     try {
       await execAsync(
-        `soffice --headless --norestore --convert-to pdf --outdir "${tmpDir}" "${inputPath}"`,
+        `soffice --headless --norestore --convert-to ${outputExt} --outdir "${tmpDir}" "${inputPath}"`,
         { timeout: 120_000, env: { ...process.env, HOME: loHome } }
       );
     } catch (err) {
