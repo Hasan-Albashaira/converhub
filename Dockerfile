@@ -15,10 +15,11 @@ RUN npm run build
 FROM node:22-slim AS runner
 WORKDIR /app
 
-# Install LibreOffice (for Word/PPT/Excel → PDF) and MS-compatible fonts
+# Install LibreOffice + Java (required for DOCX/PPTX/XLSX → PDF) + fonts
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       libreoffice \
+      default-jre-headless \
       fonts-liberation \
       fonts-freefont-ttf \
     && apt-get clean \

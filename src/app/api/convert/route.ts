@@ -178,38 +178,43 @@ async function convertOffice(
   buffer: Buffer,
   inputExt: string
 ): Promise<{ buffer: Buffer; mime: string }> {
-  const { execFile } = await import("child_process");
+  const { exec } = await import("child_process");
   const { promisify } = await import("util");
-  const execFileAsync = promisify(execFile);
+  const execAsync = promisify(exec);
 
   const id = randomUUID();
   const tmpDir = os.tmpdir();
   const loHome = path.join(tmpDir, `lo-${id}`);
   const inputPath = path.join(tmpDir, `${id}.${inputExt}`);
-  // LibreOffice writes output as <inputBaseName>.pdf in --outdir
+  // LibreOffice names output as <basename>.pdf in --outdir
   const outputPath = path.join(tmpDir, `${id}.pdf`);
 
   await fs.mkdir(loHome, { recursive: true });
   await fs.writeFile(inputPath, buffer);
 
   try {
-    await execFileAsync(
-      "libreoffice",
-      [
-        "--headless",
-        "--invisible",
-        "--norestore",
-        "--nofirststartwizard",
-        `--env:UserInstallation=file://${loHome}`,
-        "--convert-to", "pdf",
-        "--outdir", tmpDir,
-        inputPath,
-      ],
-      { timeout: 120_000, env: { ...process.env, HOME: loHome } }
-    );
+    // --invisible and --nofirststartwizard are Windows-only flags that break Linux.
+    // HOME override gives each request an isolated LO profile (no lock conflicts).
+    let loError = "";
+    try {
+      await execAsync(
+        `soffice --headless --norestore --convert-to pdf --outdir "${tmpDir}" "${inputPath}"`,
+        { timeout: 120_000, env: { ...process.env, HOME: loHome } }
+      );
+    } catch (err) {
+      loError = err instanceof Error ? err.message : String(err);
+    }
 
-    const result = await fs.readFile(outputPath);
-    return { buffer: Buffer.from(result), mime: "application/pdf" };
+    // LibreOffice sometimes exits non-zero despite successfully creating the PDF.
+    // Check whether the output file actually exists before reporting failure.
+    try {
+      const result = await fs.readFile(outputPath);
+      return { buffer: Buffer.from(result), mime: "application/pdf" };
+    } catch {
+      throw new Error(
+        loError || "Office conversion failed. The document may use unsupported features."
+      );
+    }
   } finally {
     await fs.unlink(inputPath).catch(() => {});
     await fs.unlink(outputPath).catch(() => {});
