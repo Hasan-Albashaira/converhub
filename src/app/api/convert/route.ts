@@ -173,7 +173,47 @@ async function convertMedia(
   return { buffer: result, mime: mimeMap[outputExt] ?? "application/octet-stream" };
 }
 
-// ── LibreOffice conversion (Office↔PDF, PDF→DOCX, etc.) ──────────────────────
+// ── PDF → DOCX via pdfjs-dist text extraction + docx package ─────────────────
+async function pdfToDocx(buffer: Buffer): Promise<{ buffer: Buffer; mime: string }> {
+  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const { Document, Paragraph, TextRun, Packer } = await import("docx");
+
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const paragraphs: InstanceType<typeof Paragraph>[] = [];
+
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const content = await page.getTextContent();
+
+    let lineText = "";
+    for (const item of content.items) {
+      if (!("str" in item)) continue;
+      lineText += item.str;
+      if (item.hasEOL) {
+        if (lineText.trim()) {
+          paragraphs.push(new Paragraph({ children: [new TextRun(lineText.trim())] }));
+        }
+        lineText = "";
+      }
+    }
+    if (lineText.trim()) {
+      paragraphs.push(new Paragraph({ children: [new TextRun(lineText.trim())] }));
+    }
+
+    if (pageNum < pdf.numPages) {
+      paragraphs.push(new Paragraph({ pageBreakBefore: true, children: [] }));
+    }
+  }
+
+  const doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
+  const out = await Packer.toBuffer(doc);
+  return {
+    buffer: out as Buffer,
+    mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  };
+}
+
+// ── LibreOffice conversion (Office→PDF) ───────────────────────────────────────
 const officeMime: Record<string, string> = {
   pdf:  "application/pdf",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -297,7 +337,7 @@ export async function POST(req: NextRequest) {
       ({ buffer: resultBuffer, mime } = await convertOffice(buffer, from, "pdf"));
       ext = "pdf";
     } else if (from === "pdf" && to === "docx") {
-      ({ buffer: resultBuffer, mime } = await convertOffice(buffer, "pdf", "docx"));
+      ({ buffer: resultBuffer, mime } = await pdfToDocx(buffer));
       ext = "docx";
     } else {
       return NextResponse.json(
