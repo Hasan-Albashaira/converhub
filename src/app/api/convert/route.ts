@@ -173,6 +173,50 @@ async function convertMedia(
   return { buffer: result, mime: mimeMap[outputExt] ?? "application/octet-stream" };
 }
 
+// ── Office → PDF via LibreOffice headless ─────────────────────────────────────
+async function convertOffice(
+  buffer: Buffer,
+  inputExt: string
+): Promise<{ buffer: Buffer; mime: string }> {
+  const { execFile } = await import("child_process");
+  const { promisify } = await import("util");
+  const execFileAsync = promisify(execFile);
+
+  const id = randomUUID();
+  const tmpDir = os.tmpdir();
+  const loHome = path.join(tmpDir, `lo-${id}`);
+  const inputPath = path.join(tmpDir, `${id}.${inputExt}`);
+  // LibreOffice writes output as <inputBaseName>.pdf in --outdir
+  const outputPath = path.join(tmpDir, `${id}.pdf`);
+
+  await fs.mkdir(loHome, { recursive: true });
+  await fs.writeFile(inputPath, buffer);
+
+  try {
+    await execFileAsync(
+      "libreoffice",
+      [
+        "--headless",
+        "--invisible",
+        "--norestore",
+        "--nofirststartwizard",
+        `--env:UserInstallation=file://${loHome}`,
+        "--convert-to", "pdf",
+        "--outdir", tmpDir,
+        inputPath,
+      ],
+      { timeout: 120_000, env: { ...process.env, HOME: loHome } }
+    );
+
+    const result = await fs.readFile(outputPath);
+    return { buffer: Buffer.from(result), mime: "application/pdf" };
+  } finally {
+    await fs.unlink(inputPath).catch(() => {});
+    await fs.unlink(outputPath).catch(() => {});
+    await fs.rm(loHome, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
 // ── Main route handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
@@ -230,15 +274,9 @@ export async function POST(req: NextRequest) {
     ) {
       ({ buffer: resultBuffer, mime } = await convertMedia(buffer, from, to));
       ext = to;
-    } else if (officeFormats.includes(from) || officeFormats.includes(to)) {
-      return NextResponse.json(
-        {
-          error:
-            "Office document conversion (Word, PowerPoint, Excel to PDF) is coming soon! " +
-            "In the meantime, try our free PDF, image, audio, and video converters.",
-        },
-        { status: 400 }
-      );
+    } else if (officeFormats.includes(from) && to === "pdf") {
+      ({ buffer: resultBuffer, mime } = await convertOffice(buffer, from));
+      ext = "pdf";
     } else {
       return NextResponse.json(
         { error: `Unsupported conversion: ${from} → ${to}` },
