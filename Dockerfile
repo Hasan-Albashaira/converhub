@@ -15,11 +15,10 @@ RUN NODE_OPTIONS="--max-old-space-size=1536" npm run build
 FROM node:22-slim AS runner
 WORKDIR /app
 
-# Install LibreOffice + PDF import (Office↔PDF) + Java + Python + pdf2docx + fonts
+# Install LibreOffice + Java (Office↔PDF) + Python + pdf2docx + fonts
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       libreoffice \
-      libreoffice-pdfimport \
       default-jre-headless \
       fonts-liberation \
       fonts-freefont-ttf \
