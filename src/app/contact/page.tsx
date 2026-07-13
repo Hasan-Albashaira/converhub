@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 // 1. Go to https://formspree.io and create a free account
 // 2. Create a new form and copy the endpoint (looks like https://formspree.io/f/xyzabcde)
 // 3. Replace FORMSPREE_ENDPOINT below with your actual endpoint
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xlgqewra";
 
 export default function ContactPage() {
   return (

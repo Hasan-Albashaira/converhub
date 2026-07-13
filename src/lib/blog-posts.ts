@@ -243,8 +243,6 @@ export const blogPosts: BlogPost[] = [
       { type: "p", text: "SVG is the best format for logos, icons, and illustrations because it scales perfectly to any size. Use SVG for web graphics whenever possible, and convert to PNG or JPG when you need compatibility with platforms and software that do not support SVG." },
     ],
   },
-];
-
   {
     slug: "mp4-to-gif-guide",
     title: "How to Convert MP4 to GIF: A Complete Guide",
