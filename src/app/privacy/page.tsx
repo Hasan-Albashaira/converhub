@@ -55,7 +55,7 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-6 mt-2 space-y-1">
             <li>Google Analytics (anonymized usage data)</li>
             <li>Google AdSense (advertising)</li>
-            <li>Vercel (website hosting — your file data is processed on their infrastructure)</li>
+            <li>Railway (website hosting — your file data is processed on their infrastructure)</li>
           </ul>
         </section>
 
