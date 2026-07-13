@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blogPosts, getBlogPost, type BlogSection } from "@/lib/blog-posts";
+import AdUnit from "@/components/AdUnit";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -99,6 +100,8 @@ export default async function BlogPostPage({ params }: Props) {
           <RenderSection key={i} section={section} />
         ))}
       </div>
+
+      <AdUnit />
 
       {otherPosts.length > 0 && (
         <div className="mt-16 border-t border-slate-100 pt-10">

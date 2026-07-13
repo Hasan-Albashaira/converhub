@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getConverter, converters, categoryColors, categoryLabels } from "@/lib/converters";
 import { converterContent } from "@/lib/converter-content";
 import FileConverter from "@/components/FileConverter";
+import AdUnit from "@/components/AdUnit";
 import Link from "next/link";
 
 interface Props {
@@ -68,6 +69,9 @@ export default async function ConverterPage({ params }: Props) {
       <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm mb-10">
         <FileConverter converter={converter} />
       </div>
+
+      {/* Ad unit */}
+      <AdUnit />
 
       {/* How to use */}
       <div className="bg-slate-50 rounded-2xl p-6 mb-10">
