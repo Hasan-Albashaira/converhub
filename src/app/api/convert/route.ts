@@ -190,7 +190,7 @@ async function pdfToDocx(buffer: Buffer): Promise<{ buffer: Buffer; mime: string
     let convError = "";
     try {
       await execAsync(
-        `python3 -m pdf2docx convert "${inputPath}" "${outputPath}"`,
+        `python3 -c "from pdf2docx import Converter; cv = Converter('${inputPath}'); cv.convert('${outputPath}'); cv.close()"`,
         { timeout: 120_000 }
       );
     } catch (err) {
