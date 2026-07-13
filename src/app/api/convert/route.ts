@@ -81,13 +81,15 @@ async function pdfToImage(
     pageBuffers.push(await renderPage(i));
   }
 
-  const archiver = (await import("archiver")).default;
+  // archiver uses CJS export= which doesn't work with dynamic import().default
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const createArchive = require("archiver") as (fmt: string, opts: object) => import("archiver").Archiver;
   const chunks: Buffer[] = [];
   const zipBuffer = await new Promise<Buffer>((resolve, reject) => {
-    const archive = archiver("zip", { zlib: { level: 6 } });
-    archive.on("data", (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
+    const archive = createArchive("zip", { zlib: { level: 6 } });
+    archive.on("data", (chunk: unknown) => chunks.push(Buffer.from(chunk as Buffer)));
     archive.on("end", () => resolve(Buffer.concat(chunks)));
-    archive.on("error", reject);
+    archive.on("error", (err: Error) => reject(err));
     pageBuffers.forEach((pg, i) => {
       archive.append(pg, { name: `page-${String(i + 1).padStart(2, "0")}.${outputFormat}` });
     });
