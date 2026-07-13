@@ -5,11 +5,16 @@ export const metadata: Metadata = {
   description: "Get in touch with the ZapConvert team. We respond within 24 hours.",
 };
 
+// To activate this form:
+// 1. Go to https://formspree.io and create a free account
+// 2. Create a new form and copy the endpoint (looks like https://formspree.io/f/xyzabcde)
+// 3. Replace FORMSPREE_ENDPOINT below with your actual endpoint
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID";
+
 export default function ContactPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
       <div className="text-center mb-12">
-        <div className="text-6xl mb-4">✉️</div>
         <h1 className="text-4xl font-extrabold text-slate-900 mb-4">Contact Us</h1>
         <p className="text-xl text-slate-600">
           Have a question, found a bug, or want to suggest a new converter? We would love to hear from you.
@@ -20,7 +25,7 @@ export default function ContactPage() {
         {[
           { icon: "🐛", title: "Report a Bug", desc: "Something not working? Tell us what happened and we will fix it fast." },
           { icon: "💡", title: "Feature Request", desc: "Need a conversion type we do not have yet? Request it here." },
-          { icon: "🤝", title: "Business Inquiry", desc: "Interested in our API, white-label, or partnership opportunities?" },
+          { icon: "🤝", title: "Business Inquiry", desc: "Interested in partnership or API opportunities? Get in touch." },
         ].map((item) => (
           <div key={item.title} className="bg-slate-50 rounded-2xl p-5 text-center">
             <div className="text-3xl mb-2">{item.icon}</div>
@@ -33,9 +38,8 @@ export default function ContactPage() {
       <div className="bg-white border border-slate-200 rounded-2xl p-8">
         <h2 className="text-xl font-bold text-slate-900 mb-6">Send us a message</h2>
         <form
-          action="mailto:hasanabd9191@gmail.com"
-          method="get"
-          encType="text/plain"
+          action={FORMSPREE_ENDPOINT}
+          method="POST"
           className="space-y-5"
         >
           <div>
@@ -86,7 +90,7 @@ export default function ContactPage() {
             </label>
             <textarea
               id="message"
-              name="body"
+              name="message"
               required
               rows={5}
               placeholder="Describe your question or issue in detail..."
@@ -103,12 +107,13 @@ export default function ContactPage() {
       </div>
 
       <div className="mt-8 text-center text-slate-500 text-sm">
-        <p>Or email us directly at{" "}
+        <p>
+          Or email us directly at{" "}
           <a href="mailto:hasanabd9191@gmail.com" className="text-indigo-600 font-semibold hover:underline">
             hasanabd9191@gmail.com
           </a>
         </p>
-        <p className="mt-1">We respond within 24 hours on business days.</p>
+        <p className="mt-1">We typically respond within 24 hours on business days.</p>
       </div>
     </div>
   );
