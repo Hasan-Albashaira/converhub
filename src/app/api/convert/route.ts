@@ -304,16 +304,27 @@ export async function POST(req: NextRequest) {
     let mime: string;
     let ext = to;
 
-    // Sharp handles all these input formats (bundles libvips, librsvg, libheif)
     const imageInputFormats = [
-      "jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff", "tif", "svg", "heic", "heif",
+      "jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff", "tif", "svg",
     ];
     const imageOutputFormats = ["jpg", "jpeg", "png", "webp"];
     const audioFormats = ["mp3", "wav", "m4a", "ogg", "flac", "aac"];
     const videoFormats = ["mp4", "mov", "avi", "webm"];
     const officeFormats = ["docx", "doc", "pptx", "ppt", "xlsx", "xls"];
 
-    if (imageInputFormats.includes(from) && imageOutputFormats.includes(to)) {
+    // HEIC: Sharp bundles libheif but its security limit rejects complex iPhone photos.
+    // Try conversion; fall back to a friendly message on failure.
+    if (from === "heic" || from === "heif") {
+      try {
+        ({ buffer: resultBuffer, mime } = await convertImage(buffer, to));
+        ext = to === "jpeg" ? "jpg" : to;
+      } catch {
+        return NextResponse.json(
+          { error: "This HEIC file uses advanced features our converter doesn't support yet. On iPhone, share the photo and choose 'Most Compatible' to save as JPG instead." },
+          { status: 400 }
+        );
+      }
+    } else if (imageInputFormats.includes(from) && imageOutputFormats.includes(to)) {
       ({ buffer: resultBuffer, mime } = await convertImage(buffer, to));
       ext = to === "jpeg" ? "jpg" : to;
     } else if (imageInputFormats.includes(from) && to === "pdf") {
@@ -341,13 +352,17 @@ export async function POST(req: NextRequest) {
     }
 
     const filename = `${originalName}-zapconvert.${ext}`;
+    // HTTP headers must be Latin-1 (ByteString). Use RFC 5987 for Unicode filenames
+    // so emoji/non-ASCII in the original filename don't throw.
+    const asciiFallback = filename.replace(/[^\x20-\x7E]/g, "_");
+    const rfc5987 = `UTF-8''${encodeURIComponent(filename)}`;
 
     return new NextResponse(resultBuffer as unknown as BodyInit, {
       status: 200,
       headers: {
         "Content-Type": mime,
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "X-Filename": filename,
+        "Content-Disposition": `attachment; filename="${asciiFallback}"; filename*=${rfc5987}`,
+        "X-Filename": asciiFallback,
         "Cache-Control": "no-store",
       },
     });
