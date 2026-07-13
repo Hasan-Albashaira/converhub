@@ -173,44 +173,43 @@ async function convertMedia(
   return { buffer: result, mime: mimeMap[outputExt] ?? "application/octet-stream" };
 }
 
-// ── PDF → DOCX via pdfjs-dist text extraction + docx package ─────────────────
+// ── PDF → DOCX via pdf2docx (Python) — preserves layout, tables, images ──────
 async function pdfToDocx(buffer: Buffer): Promise<{ buffer: Buffer; mime: string }> {
-  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const { Document, Paragraph, TextRun, Packer } = await import("docx");
+  const { exec } = await import("child_process");
+  const { promisify } = await import("util");
+  const execAsync = promisify(exec);
 
-  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
-  const paragraphs: InstanceType<typeof Paragraph>[] = [];
+  const id = randomUUID();
+  const tmpDir = os.tmpdir();
+  const inputPath = path.join(tmpDir, `${id}.pdf`);
+  const outputPath = path.join(tmpDir, `${id}.docx`);
 
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const content = await page.getTextContent();
+  await fs.writeFile(inputPath, buffer);
 
-    let lineText = "";
-    for (const item of content.items) {
-      if (!("str" in item)) continue;
-      lineText += item.str;
-      if (item.hasEOL) {
-        if (lineText.trim()) {
-          paragraphs.push(new Paragraph({ children: [new TextRun(lineText.trim())] }));
-        }
-        lineText = "";
-      }
-    }
-    if (lineText.trim()) {
-      paragraphs.push(new Paragraph({ children: [new TextRun(lineText.trim())] }));
+  try {
+    let convError = "";
+    try {
+      await execAsync(
+        `python3 -m pdf2docx convert "${inputPath}" "${outputPath}"`,
+        { timeout: 120_000 }
+      );
+    } catch (err) {
+      convError = err instanceof Error ? err.message : String(err);
     }
 
-    if (pageNum < pdf.numPages) {
-      paragraphs.push(new Paragraph({ pageBreakBefore: true, children: [] }));
+    try {
+      const result = await fs.readFile(outputPath);
+      return {
+        buffer: Buffer.from(result),
+        mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      };
+    } catch {
+      throw new Error(convError || "PDF to Word conversion failed.");
     }
+  } finally {
+    await fs.unlink(inputPath).catch(() => {});
+    await fs.unlink(outputPath).catch(() => {});
   }
-
-  const doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
-  const out = await Packer.toBuffer(doc);
-  return {
-    buffer: out as Buffer,
-    mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  };
 }
 
 // ── LibreOffice conversion (Office→PDF) ───────────────────────────────────────

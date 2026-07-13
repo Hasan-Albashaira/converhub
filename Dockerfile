@@ -15,13 +15,16 @@ RUN npm run build
 FROM node:22-slim AS runner
 WORKDIR /app
 
-# Install LibreOffice + Java (required for DOCX/PPTX/XLSX → PDF) + fonts
+# Install LibreOffice + Java (Office→PDF) + Python + pdf2docx (PDF→DOCX) + fonts
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       libreoffice \
       default-jre-headless \
       fonts-liberation \
       fonts-freefont-ttf \
+      python3 \
+      python3-pip \
+    && pip3 install --no-cache-dir --break-system-packages pdf2docx \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
