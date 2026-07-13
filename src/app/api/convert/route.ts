@@ -173,7 +173,7 @@ async function convertMedia(
   return { buffer: result, mime: mimeMap[outputExt] ?? "application/octet-stream" };
 }
 
-// ── PDF → DOCX via pdf2docx (Python) — preserves layout, tables, images ──────
+// ── PDF → DOCX: LibreOffice PDF import (primary) → pdf2docx (fallback) ────────
 async function pdfToDocx(buffer: Buffer): Promise<{ buffer: Buffer; mime: string }> {
   const { exec } = await import("child_process");
   const { promisify } = await import("util");
@@ -181,20 +181,23 @@ async function pdfToDocx(buffer: Buffer): Promise<{ buffer: Buffer; mime: string
 
   const id = randomUUID();
   const tmpDir = os.tmpdir();
+  const loHome = path.join(tmpDir, `lo-${id}`);
   const inputPath = path.join(tmpDir, `${id}.pdf`);
   const outputPath = path.join(tmpDir, `${id}.docx`);
 
+  await fs.mkdir(loHome, { recursive: true });
   await fs.writeFile(inputPath, buffer);
 
   try {
-    let convError = "";
+    // Primary: LibreOffice with PDF import filter — best for bilingual/RTL layouts
+    let loError = "";
     try {
       await execAsync(
-        `python3 -c "from pdf2docx import Converter; cv = Converter('${inputPath}'); cv.convert('${outputPath}'); cv.close()"`,
-        { timeout: 120_000 }
+        `soffice --headless --norestore --infilter="writer_pdf_import" --convert-to docx --outdir "${tmpDir}" "${inputPath}"`,
+        { timeout: 120_000, env: { ...process.env, HOME: loHome } }
       );
     } catch (err) {
-      convError = err instanceof Error ? err.message : String(err);
+      loError = err instanceof Error ? err.message : String(err);
     }
 
     try {
@@ -204,11 +207,31 @@ async function pdfToDocx(buffer: Buffer): Promise<{ buffer: Buffer; mime: string
         mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       };
     } catch {
-      throw new Error(convError || "PDF to Word conversion failed.");
+      // Fallback: pdf2docx Python library
+      let convError = loError;
+      try {
+        await execAsync(
+          `python3 -c "from pdf2docx import Converter; cv = Converter('${inputPath}'); cv.convert('${outputPath}'); cv.close()"`,
+          { timeout: 120_000 }
+        );
+      } catch (err) {
+        convError = err instanceof Error ? err.message : String(err);
+      }
+
+      try {
+        const result = await fs.readFile(outputPath);
+        return {
+          buffer: Buffer.from(result),
+          mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        };
+      } catch {
+        throw new Error(convError || "PDF to Word conversion failed.");
+      }
     }
   } finally {
     await fs.unlink(inputPath).catch(() => {});
     await fs.unlink(outputPath).catch(() => {});
+    await fs.rm(loHome, { recursive: true, force: true }).catch(() => {});
   }
 }
 
