@@ -45,36 +45,56 @@ async function convertImage(
 }
 
 // ── PDF → image (pdfjs-dist + @napi-rs/canvas) ────────────────────────────────
+// Single page → returns the image directly.
+// Multi-page → returns a ZIP containing one image per page.
 async function pdfToImage(
   buffer: Buffer,
   outputFormat: "jpg" | "png"
-): Promise<{ buffer: Buffer; mime: string }> {
+): Promise<{ buffer: Buffer; mime: string; ext: string }> {
   const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const { createCanvas } = await import("@napi-rs/canvas");
 
-  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
-  const pdfDoc = await loadingTask.promise;
-  const page = await pdfDoc.getPage(1);
-  const viewport = page.getViewport({ scale: 2.0 });
+  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const numPages = pdfDoc.numPages;
+  const imgMime = outputFormat === "png" ? "image/png" : "image/jpeg";
 
-  const canvas = createCanvas(viewport.width, viewport.height);
-  const ctx = canvas.getContext("2d");
-
-  await page.render({
-    canvasContext: ctx as unknown as CanvasRenderingContext2D,
-    viewport,
-    canvas: canvas as unknown as HTMLCanvasElement,
-  }).promise;
-
-  const imageBuffer =
-    outputFormat === "png"
-      ? canvas.toBuffer("image/png")
-      : canvas.toBuffer("image/jpeg");
-
-  return {
-    buffer: imageBuffer as Buffer,
-    mime: outputFormat === "png" ? "image/png" : "image/jpeg",
+  const renderPage = async (pageNum: number): Promise<Buffer> => {
+    const page = await pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 2.0 });
+    const canvas = createCanvas(viewport.width, viewport.height);
+    const ctx = canvas.getContext("2d");
+    await page.render({
+      canvasContext: ctx as unknown as CanvasRenderingContext2D,
+      viewport,
+      canvas: canvas as unknown as HTMLCanvasElement,
+    }).promise;
+    return (outputFormat === "png" ? canvas.toBuffer("image/png") : canvas.toBuffer("image/jpeg")) as Buffer;
   };
+
+  if (numPages === 1) {
+    return { buffer: await renderPage(1), mime: imgMime, ext: outputFormat };
+  }
+
+  // Render all pages then zip them
+  const pageBuffers: Buffer[] = [];
+  for (let i = 1; i <= numPages; i++) {
+    pageBuffers.push(await renderPage(i));
+  }
+
+  const archiver = (await import("archiver")).default;
+  const chunks: Buffer[] = [];
+  const zipBuffer = await new Promise<Buffer>((resolve, reject) => {
+    const archive = archiver("zip", { zlib: { level: 6 } });
+    archive.on("data", (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
+    archive.on("end", () => resolve(Buffer.concat(chunks)));
+    archive.on("error", reject);
+    pageBuffers.forEach((pg, i) => {
+      archive.append(pg, { name: `page-${String(i + 1).padStart(2, "0")}.${outputFormat}` });
+    });
+    archive.finalize();
+  });
+
+  return { buffer: zipBuffer, mime: "application/zip", ext: "zip" };
 }
 
 // ── Image → PDF (pdf-lib, pure JS) ────────────────────────────────────────────
@@ -324,8 +344,7 @@ export async function POST(req: NextRequest) {
       ({ buffer: resultBuffer, mime } = await imageToPdf(buffer, file.type));
       ext = "pdf";
     } else if (from === "pdf" && (to === "jpg" || to === "png")) {
-      ({ buffer: resultBuffer, mime } = await pdfToImage(buffer, to as "jpg" | "png"));
-      ext = to;
+      ({ buffer: resultBuffer, mime, ext } = await pdfToImage(buffer, to as "jpg" | "png"));
     } else if (
       [...audioFormats, ...videoFormats].includes(from) &&
       [...audioFormats, ...videoFormats, "gif"].includes(to)
