@@ -63,6 +63,27 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Popular Converters</h2>
         <p className="text-slate-500 mb-8">The most used conversion tools, always free.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Featured: Images to PDF (multi-file) */}
+          <Link
+            href="/images-to-pdf"
+            className="group flex items-start gap-4 p-5 bg-white border-2 border-indigo-200 rounded-2xl hover:border-indigo-400 hover:shadow-md transition-all relative overflow-hidden"
+          >
+            <span className="absolute top-3 right-3 px-2 py-0.5 bg-indigo-600 text-white text-xs font-bold rounded-full">
+              NEW
+            </span>
+            <div className="text-3xl">🖼️</div>
+            <div>
+              <h3 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                Images to PDF
+              </h3>
+              <p className="text-sm text-slate-500 mt-0.5 line-clamp-2">
+                Merge multiple JPG, PNG, WebP and other images into one PDF. Reorder pages before downloading.
+              </p>
+              <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                Documents
+              </span>
+            </div>
+          </Link>
           {popular.map((c) => (
             <Link
               key={c.slug}
@@ -97,6 +118,16 @@ export default function HomePage() {
                   </span>
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {/* Images to PDF appears first in the Documents category */}
+                  {cat === "document" && (
+                    <Link
+                      href="/images-to-pdf"
+                      className="flex items-center gap-2.5 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl text-sm font-medium text-indigo-700 hover:border-indigo-400 hover:shadow-sm transition-all"
+                    >
+                      <span>🖼️</span>
+                      Images to PDF
+                    </Link>
+                  )}
                   {items.map((c) => (
                     <Link
                       key={c.slug}
