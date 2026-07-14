@@ -37,29 +37,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
       <head>
-        {/* Google AdSense */}
+        {/* Google AdSense — loads for all visitors (required for ad display) */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5488522956972594"
           crossOrigin="anonymous"
         />
-        {/* Google Analytics — must be in <head> for Search Console verification */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-KXSMKXG2LS"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-KXSMKXG2LS', {
-                cookie_domain: 'zapconvert.net'
-              });
-            `,
-          }}
-        />
+        {/*
+          Google Analytics is NOT loaded here.
+          It is loaded dynamically in CookieBanner only after the user accepts cookies,
+          so that EU visitors are not tracked before giving consent (GDPR compliance).
+        */}
       </head>
       <body className="min-h-full flex flex-col bg-white text-slate-900">
         <Header />

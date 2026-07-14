@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 declare global {
   interface Window {
     adsbygoogle: unknown[];
+    dataLayer: unknown[];
+    gtag: (...args: unknown[]) => void;
   }
 }
 

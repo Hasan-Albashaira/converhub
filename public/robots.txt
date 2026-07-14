@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Disallow API routes — no value in indexing them
+Disallow: /api/
+
+Sitemap: https://zapconvert.net/sitemap.xml

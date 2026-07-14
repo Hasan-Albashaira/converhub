@@ -37,7 +37,7 @@ export default function AboutPage() {
           ZapConvert was created with one goal: make file conversion accessible to everyone for free. Whether you are a student converting a PDF for school, a professional converting documents for work, or a creator converting videos for social media — ZapConvert is built for you.
         </p>
         <p className="text-slate-600 leading-relaxed">
-          We support 25+ file formats across documents, images, audio, and video. Our tools are used by people in over 100 countries every day. And the best part — the core service is completely free, with no signup required.
+          We support 38+ conversion types across documents, images, audio, and video. And the best part — the core service is completely free, with no signup required.
         </p>
       </div>
 
@@ -45,10 +45,10 @@ export default function AboutPage() {
         <h2 className="text-2xl font-bold text-slate-900 mb-6">By the numbers</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { value: "25+", label: "File formats" },
+            { value: "38+", label: "Conversion types" },
             { value: "100%", label: "Free to use" },
             { value: "1 hour", label: "File deletion" },
-            { value: "100+", label: "Countries served" },
+            { value: "0", label: "Accounts required" },
           ].map((s) => (
             <div key={s.label}>
               <div className="text-3xl font-extrabold text-indigo-600">{s.value}</div>

@@ -3,6 +3,20 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
+import { isAllowed, getClientIp } from "@/lib/rate-limit";
+
+// Safe user-facing messages that don't expose internal details
+function safeError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes("HEIC") || msg.includes("heif")) return msg; // already user-friendly
+  if (msg.includes("too large") || msg.includes("Missing")) return msg;
+  if (msg.includes("Unsupported conversion")) return msg;
+  if (msg.includes("unsupported") && msg.includes("format")) return "Unsupported file format for this conversion.";
+  if (msg.includes("PDF to Word conversion failed")) return "Could not convert this PDF to Word. The file may be scanned or use unsupported features.";
+  if (msg.includes("Conversion failed")) return "Conversion failed. The file may use unsupported features or be corrupted.";
+  // Don't expose LibreOffice/FFmpeg/Python internals
+  return "Conversion failed. Please check the file and try again.";
+}
 
 // ── Image conversion via Sharp ─────────────────────────────────────────────────
 // Sharp 0.33+ bundles libvips in its pre-built Linux binary — no system
@@ -284,6 +298,15 @@ async function convertOffice(
 
 // ── Main route handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  // Rate limit: 20 conversions per 10 minutes per IP
+  const ip = getClientIp(req);
+  if (!isAllowed(ip, 20, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a few minutes and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
@@ -367,8 +390,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unexpected server error.";
-    console.error("[zapconvert] conversion error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[zapconvert] conversion error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: safeError(err) }, { status: 500 });
   }
 }

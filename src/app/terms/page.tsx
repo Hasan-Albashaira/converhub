@@ -42,12 +42,12 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-xl font-bold text-slate-800 mb-3">5. Free Tier Limitations</h2>
-          <p>The free tier of ZapConvert includes 3 conversions per day with a maximum file size of 25 MB per file. We reserve the right to change these limits at any time.</p>
+          <p>The free tier of ZapConvert currently allows unlimited conversions with a maximum file size of 25 MB per file (100 MB for video and audio). We reserve the right to introduce usage limits in the future with advance notice to users.</p>
         </section>
 
         <section>
           <h2 className="text-xl font-bold text-slate-800 mb-3">6. Paid Subscriptions</h2>
-          <p>Paid plans are billed monthly or annually. You may cancel at any time. Refunds are available within 7 days of purchase. Payments are processed securely by Stripe.</p>
+          <p>ZapConvert is currently free to use. Paid plans with additional features may be introduced in the future. Any paid plans will include clear pricing and a cancellation option.</p>
         </section>
 
         <section>

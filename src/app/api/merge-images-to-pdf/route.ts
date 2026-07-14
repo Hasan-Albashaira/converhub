@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAllowed, getClientIp } from "@/lib/rate-limit";
 
 async function multiImagesToPdf(
   files: { buffer: Buffer; mime: string }[]
@@ -34,6 +35,15 @@ async function multiImagesToPdf(
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 10 merges per 10 minutes per IP (heavier operation)
+  const ip = getClientIp(req);
+  if (!isAllowed(ip, 10, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a few minutes and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const formData = await req.formData();
     const files = formData.getAll("files") as File[];
@@ -77,8 +87,10 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unexpected error.";
-    console.error("[zapconvert] merge-images-to-pdf error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[zapconvert] merge-images-to-pdf error:", err instanceof Error ? err.message : err);
+    return NextResponse.json(
+      { error: "Merge failed. One or more images may be corrupted or in an unsupported format." },
+      { status: 500 }
+    );
   }
 }

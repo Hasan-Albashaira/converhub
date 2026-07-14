@@ -2,17 +2,42 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+const GA_ID = "G-KXSMKXG2LS";
+
+function loadGoogleAnalytics() {
+  if (typeof window === "undefined") return;
+  if (document.getElementById("ga-script")) return; // already loaded
+
+  const script = document.createElement("script");
+  script.id = "ga-script";
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(...args: unknown[]) { window.dataLayer.push(args); }
+  window.gtag = gtag;
+  gtag("js", new Date());
+  gtag("config", GA_ID, { cookie_domain: "zapconvert.net" });
+}
+
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem("cookie_consent")) {
+    const consent = localStorage.getItem("cookie_consent");
+    if (!consent) {
       setVisible(true);
+    } else if (consent === "accepted") {
+      // User already accepted in a previous visit — load GA immediately
+      loadGoogleAnalytics();
     }
+    // If consent === "declined", we do nothing — GA is not loaded
   }, []);
 
   const accept = () => {
     localStorage.setItem("cookie_consent", "accepted");
+    loadGoogleAnalytics();
     setVisible(false);
   };
 
