@@ -76,7 +76,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-xl font-bold text-slate-800 mb-3">10. Contact Us</h2>
-          <p>If you have any questions about this Privacy Policy, contact us at: <a href="mailto:hasanabd9191@gmail.com" className="text-indigo-600 underline">hasanabd9191@gmail.com</a></p>
+          <p>If you have any questions about this Privacy Policy, contact us at: <a href="mailto:support@zapconvert.net" className="text-indigo-600 underline">support@zapconvert.net</a></p>
         </section>
 
       </div>

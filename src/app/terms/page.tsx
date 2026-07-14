@@ -67,7 +67,7 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-xl font-bold text-slate-800 mb-3">10. Contact</h2>
-          <p>For any questions regarding these terms, contact us at: <a href="mailto:hasanabd9191@gmail.com" className="text-indigo-600 underline">hasanabd9191@gmail.com</a></p>
+          <p>For any questions regarding these terms, contact us at: <a href="mailto:support@zapconvert.net" className="text-indigo-600 underline">support@zapconvert.net</a></p>
         </section>
 
       </div>

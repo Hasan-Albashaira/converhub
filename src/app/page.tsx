@@ -170,15 +170,15 @@ export default function HomePage() {
       {/* CTA */}
       <section className="bg-indigo-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 text-center">
-          <h2 className="text-3xl font-extrabold text-white mb-3">Need more power?</h2>
+          <h2 className="text-3xl font-extrabold text-white mb-3">Have a question or found a bug?</h2>
           <p className="text-indigo-200 mb-6 text-lg">
-            Upgrade to Pro for unlimited conversions, larger files, and batch processing.
+            We read every message and typically respond within 24 hours.
           </p>
           <Link
-            href="/pricing"
+            href="/contact"
             className="inline-block px-8 py-3.5 bg-white text-indigo-700 font-bold rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
           >
-            See Pricing →
+            Contact Us →
           </Link>
         </div>
       </section>

@@ -109,8 +109,8 @@ export default function ContactPage() {
       <div className="mt-8 text-center text-slate-500 text-sm">
         <p>
           Or email us directly at{" "}
-          <a href="mailto:hasanabd9191@gmail.com" className="text-indigo-600 font-semibold hover:underline">
-            hasanabd9191@gmail.com
+          <a href="mailto:support@zapconvert.net" className="text-indigo-600 font-semibold hover:underline">
+            support@zapconvert.net
           </a>
         </p>
         <p className="mt-1">We typically respond within 24 hours on business days.</p>
